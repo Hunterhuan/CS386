@@ -1,10 +1,14 @@
 # cs386
+## Dependencies
+```bash
+pip install -r requirments.txt
+```
 
 ## preprocess
 
 Read the dataset and divide into train and valid set.
 
-```
+```bash
 python preprocess.py
 ```
 
@@ -23,3 +27,8 @@ for dir_name, filename_list in train_dataset.items():
 # for valid set, the code is just same as above.
 ```
 
+## train
+```bash
+python train.py kwargs/oracle/mobilenetv2/defaults.py
+```
+Baseline: 97.36
