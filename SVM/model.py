@@ -5,12 +5,12 @@ from sklearn import svm
 
 
 def load_data():
-    train_data = np.loadtxt("traindataset/traindata.txt", dtype=int)
+    train_data = np.loadtxt("SVM/traindataset/traindata.txt", dtype=int)
     train_x = train_data[:, :-1]
     train_x = np.transpose(train_x)
     train_x = np.transpose(train_x)
     train_y = train_data[:, -1]
-    val_data = np.loadtxt("valdataset/valdata.txt", dtype=int)
+    val_data = np.loadtxt("SVM/valdataset/valdata.txt", dtype=int)
     SVM = svm.SVC(gamma="scale")
     SVM.fit(train_x, train_y)
     val_x = val_data[:, :-1]
