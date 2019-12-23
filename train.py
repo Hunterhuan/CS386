@@ -10,6 +10,8 @@ import torch.backends.cudnn as cudnn
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
+import os
+os.environ["CUDA_VISIBLE_DEVICES"]="6"
 
 
 if __name__ == '__main__':

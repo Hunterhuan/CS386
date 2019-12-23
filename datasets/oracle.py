@@ -5,6 +5,7 @@ from PIL import Image
 from torchvision import datasets, transforms
 import json
 import torch
+import sys
 
 
 class Oracle(dict):
@@ -16,14 +17,14 @@ class Oracle(dict):
 
 
 class OracleInternal:
-    def __init__(self, root, split='train'):
+    def __init__(self, root, split='train', data_augmentation_type = 1):
         self.root = root
         self.split = split
         if split=="train":
-            with open("train.json","r")as f:
+            with open(os.path.join(root, "train.json"),"r")as f:
                 file_json = json.load(f)
         else:
-            with open("val.json","r")as f:
+            with open(os.path.join(root, "val.json"),"r")as f:
                 file_json = json.load(f)
 
         all_data = []
@@ -39,34 +40,30 @@ class OracleInternal:
         for dir_name, filename_list in file_json.items():
             # label is dir_name
             for filename in filename_list:
-                file_dir = os.path.join("dataset", dir_name, filename)
+                file_dir = os.path.join(root, "dataset", dir_name, filename)
                 # print(file_dir)
                 all_data.append(np.asarray(Image.open(file_dir).resize((64,64),Image.ANTIALIAS)))
                 all_labels.append(label2id[dir_name])
-
-        # for db in databases:
-        #     with open(os.path.join(self.root, db), 'rb') as f:
-        #         dic = pickle.load(f, encoding='bytes')
-        #         data = dic[b'data'].astype(np.uint8)
-        #         labels = np.array(dic[b'labels']).astype(np.int64)
-            
-        #         all_data.append(data)
-        #         all_labels.append(labels)
     
         all_data = np.vstack(all_data).reshape(-1, 1, 64, 64).transpose(0, 2, 3, 1).astype(np.uint8)
         all_labels = np.array(all_labels).astype(np.int64)
         self.all_data = all_data
         self.all_labels = all_labels
-        
+        transform_list = []
+        # if data_augmentation_type==1:
+        #     transform_list.append(transforms.RandomCrop(45))
+        #     transform_list.append(transforms.Resize((64,64)))
+        # if data_augmentation_type==2:
+        #     tmp_tranforms = transforms.RandomChoice
+        #     transforms_list.append(transforms.RandomResizedCrop(
+        #         (64,64),
+        #         scale = ()))
+
+        transform_list.append(transforms.ToTensor())
+        transform_list.append(transforms.Normalize(mean=[0.1307,],
+                                     std=[0.3081,]))
         if self.split == 'train':
-            self.transform = transforms.Compose([
-                # transforms.Pad(4),
-                # transforms.RandomCrop(32),
-                # transforms.RandomHorizontalFlip(),
-                transforms.ToTensor(),
-                transforms.Normalize(mean=[0.1307,],
-                                     std=[0.3081,])
-            ])
+            self.transform = transforms.Compose(transform_list)
         else:
             self.transform = transforms.Compose([
                 transforms.ToTensor(),
@@ -90,8 +87,8 @@ class OracleInternal:
 
 
 if __name__ == '__main__':
-    dataset = Oracle('data/CIFAR')
-    train_dataset = dataset['test']
+    dataset = Oracle('../')
+    train_dataset = dataset['train']
     img = train_dataset.__getitem__(3)[0]
     img = img.numpy()
     img = (img-img.min()) / (img.max()-img.min()) * 255.0
